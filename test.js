@@ -1,74 +1,76 @@
-var libraries = {}
-
+var libraries = {};
 
 function addLibrary(name, callback) {
   libraries[name] = callback;
 }
 
-
 function runTests() {
-
   results = {};
 
   for (key in libraries) {
     var testFunction = libraries[key];
-    results[key] = getResults(testFunction);
+    results[key] = getResults(testFunction, key);
   }
 
   drawResults(results);
 }
 
-
 function drawResults(results) {
-  var wrapper = document.querySelector('#results');
-  wrapper.innerHTML = '';
+  var wrapper = document.querySelector("#results");
+  wrapper.innerHTML = "";
 
-  var output = document.createDocumentFragment()
+  var output = document.createDocumentFragment();
 
-  var resultsList = Object.keys(results).map(function (key) {
-    var result = results[key]
-    result.key = key
-    return result
-  })
-  // priority: Valid (v), Longest (^), Duration (^)
-  .sort(function(curr, next) {
-    return next.validSelectors.length - curr.validSelectors.length ||
-           curr.longestSelector.length - next.longestSelector.length ||
-           curr.duration - next.duration
-  })
+  var resultsList = Object.keys(results)
+    .map(function (key) {
+      var result = results[key];
+      result.key = key;
+      return result;
+    })
+    // priority: Valid (v), Longest (^), Duration (^)
+    .sort(function (curr, next) {
+      return (
+        next.validSelectors.length - curr.validSelectors.length ||
+        curr.longestSelector.length - next.longestSelector.length ||
+        curr.duration - next.duration
+      );
+    });
 
-  resultsList.forEach(function(data) {
-    var row = output.appendChild(document.createElement('tr'));
+  resultsList.forEach(function (data) {
+    var row = output.appendChild(document.createElement("tr"));
     addCell(row, data.key);
     addCell(row, data.validSelectors.length);
     addCell(row, data.invalidSelectors.length);
     addCell(row, data.notFoundSelectors);
     addCell(row, data.nonUniqueSelectors.length);
     addCell(row, data.nonMatchingSelectors.length);
-    addCell(row, "(" + data.longestSelector.length + ") " + data.longestSelector);
+    addCell(row, data.longestSelector.length);
+    addCell(row, data.longestSelector);
     addCell(row, data.duration + "ms");
-  })
+  });
 
   wrapper.appendChild(output);
 
   console.log(resultsList);
 }
 
-function hasInvalidSelectors (data) {
-  return data.invalidSelectors.length || data.notFoundSelectors.length ||
-         data.nonUniqueSelectors.length || data.nonMatchingSelectors.length
+function hasInvalidSelectors(data) {
+  return (
+    data.invalidSelectors.length ||
+    data.notFoundSelectors.length ||
+    data.nonUniqueSelectors.length ||
+    data.nonMatchingSelectors.length
+  );
 }
 
 function addCell(row, content) {
-  var cell = row.appendChild(document.createElement('td'));
+  var cell = row.appendChild(document.createElement("td"));
   cell.appendChild(document.createTextNode(content));
   return cell;
 }
 
-
-function getResults(testFunction) {
-
-  var elements = document.querySelector('#wrap').querySelectorAll('*');
+function getResults(testFunction, libName) {
+  var elements = document.querySelector("#wrap").querySelectorAll("*");
 
   var result = {
     duration: -1,
@@ -77,38 +79,55 @@ function getResults(testFunction) {
     nonUniqueSelectors: [],
     nonMatchingSelectors: [],
     notFoundSelectors: 0,
-    longestSelector: ''
+    longestSelector: "",
   };
   var outputs = [];
 
-  var timeStart = (new Date).getTime();
+  var timeStart = new Date().getTime();
 
+  console.log(
+    "Running tests on library",
+    libName,
+    "for " + elements.length + " elements"
+  );
+  var first = true;
   for (var i = 0, j = elements.length; i < j; i++) {
     var element = elements[i];
-    var selector = testFunction(element);
+    try {
+      var selector = testFunction(element);
+    } catch (e) {
+      if (first) {
+        console.log("Failed to run library function");
+        console.error(e);
+        first = false;
+      }
+      selector = "FAILED #"+i;
+      // continue;
+    }
+    if (!selector || selector == "") {
+      selector = "UNKNOWN"
+    }
     outputs.push({
       element: element,
-      selector: selector
+      selector: selector,
     });
   }
 
-  var timeEnd = (new Date).getTime();
-  result.duration = timeEnd - timeStart
+  var timeEnd = new Date().getTime();
+  result.duration = timeEnd - timeStart;
 
   for (i = 0, j = outputs.length; i < j; i++) {
     var selector = outputs[i].selector;
     var element = outputs[i].element;
 
     if (selector) {
-
-      var foundElements = []
+      var foundElements = [];
 
       try {
         foundElements = document.querySelectorAll(selector);
       } catch (e) {
         result.invalidSelectors.push(selector);
       }
-
 
       if (foundElements.length > 1) {
         result.nonUniqueSelectors.push(selector);
@@ -123,11 +142,9 @@ function getResults(testFunction) {
       if (selector.length > result.longestSelector.length) {
         result.longestSelector = selector;
       }
-
     } else {
       result.notFoundSelectors++;
     }
-
   }
 
   return result;

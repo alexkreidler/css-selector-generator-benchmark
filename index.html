@@ -20,7 +20,8 @@
         'selector-generator': 'vendor/selector-generator/lib/selector-generator',
         'CSSelector': 'vendor/CSSelector.js/dist/CSSelector',
         'OptimalSelect': 'node_modules/optimal-select/dist/optimal-select',
-        'css-selector-generator': 'node_modules/css-selector-generator/build/css-selector-generator'
+        'css-selector-generator': 'node_modules/css-selector-generator/build/css-selector-generator',
+        'finder': 'node_modules/@medv/finder'
       }
     });
   </script>
@@ -177,8 +178,10 @@
   <script src="temp/finder/index.js"></script>
   <script>
     (function () {
-      addLibrary('antonmedv/finder', function (element) {
-        return finder.default(element);
+      require(['finder'], function (finder) {
+        addLibrary('antonmedv/finder', function (element) {
+          return finder(element);
+        });
       });
     })();
   </script>
@@ -212,6 +215,7 @@
         <th>Not found</th>
         <th>Non unique</th>
         <th>Not matching</th>
+        <th>Longest selector length</th>
         <th>Longest selector</th>
         <th>Duration</th>
       </tr>

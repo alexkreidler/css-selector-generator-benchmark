@@ -5,9 +5,9 @@
   "main": "index.html",
   "scripts": {
     "pretest": "git submodule update --init && npm run compile",
-    "test": "index.html",
+    "start": "serve",
     "compile": "npm run compile:finder",
-    "compile:finder": "webpack --config ./config/webpack.medv.finder.js"
+    "compile:finder": "webpack-cli --config ./config/webpack.medv.finder.js"
   },
   "repository": {
     "type": "git",
@@ -21,9 +21,9 @@
   "author": "Riki Fridrich <riki@fczbkk.com> (http://fczbkk.com/)",
   "license": "MIT",
   "dependencies": {
-    "@medv/finder": "^1.1.2",
+    "@medv/finder": "^2.0.0",
     "css-selector": "^0.1.0",
-    "css-selector-generator": "^1.2.0",
+    "css-selector-generator": "^2.1.2",
     "cssman": "0.0.2",
     "domtalk": "0.0.2",
     "get-query-selector": "0.0.1",
@@ -34,6 +34,6 @@
   },
   "devDependencies": {
     "webpack": "^4.4.1",
-    "webpack-cli": "^2.0.13"
+    "webpack-cli": "^3.3.12"
   }
 }
